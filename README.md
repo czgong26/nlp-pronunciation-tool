@@ -14,21 +14,40 @@ Analysis Tools: Jaro-Winkler similarity for phonetic matching, Levenshtein dista
 
 ## Backend Setup
 
-1. Go to the root directory of the project and install dependencies
+1. Clone the repository
+
+```
+git clone https://github.com/czgong26/nlp-pronunciation-tool.git
+cd nlp-pronunciation-tool
+```
+
+2. Create a virtual environment and activate it – ensure Python is installed
+
+```
+python -m venv venv
+
+# macOS / Linux
+source venv/bin/activate
+
+# Windows
+venv\Scripts\activate
+```
+
+3. Install dependencies
 
 ```
 pip install -r requirements.txt
 ```
 
-2. Create an OpenAI API key: 
+4. Create an OpenAI API key: https://platform.openai.com/docs/overview. You will also need to add payment information in order to run the models used in this application ($5 should be more than enough).
 
-3. Create a .env file with your OpenAI API key
+5. Create a .env file with your OpenAI API key
 
 ```
 OPENAI_API_KEY=your_api_key_here
 ```
 
-4. Run server
+6. Run server
 
 ```
 python main.py
