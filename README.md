@@ -7,15 +7,16 @@ This is a web application tool for users to check their pronunciation and fluenc
 ## Tech Stack
 
 Frontend: React, Lucide React, Tailwind CSS, Web Audio API
+
 Backend: FastAPI, OpenAI Whisper/TTS/GPT-4, Librosa, Jellyfish
+
 Analysis Tools: Jaro-Winkler similarity for phonetic matching, Levenshtein distance for edit-based scoring, spectral analysis (spectral centroid, zero-crossing rate), prosody metrics for fluency/tempo/rhythm, RMS energy/volume analysis
 
 ## Backend Setup
 
-1. Install dependencies
+1. Go to the root directory of the project and install dependencies
 
 ```
-cd backend
 pip install -r requirements.txt
 ```
 
