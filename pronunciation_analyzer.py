@@ -16,19 +16,22 @@ def extract_audio_features(audio_path: str) -> Dict:
     try:
         # Load audio
         y, sr = librosa.load(audio_path, sr=16000)
-        
+
         # Extract features
-        features = {            
+        features = {
+            # Duration
+            "duration": float(librosa.get_duration(y=y, sr=sr)),
+
             # Volume
             "rms_energy": float(np.mean(librosa.feature.rms(y=y))),
-            
+
             # Spectral features
             "spectral_centroid": float(np.mean(librosa.feature.spectral_centroid(y=y, sr=sr))),
-            
+
             # Zero crossing rate (indicator of pronunciation clarity)
             "zcr": float(np.mean(librosa.feature.zero_crossing_rate(y))),
         }
-        
+
         return features
     
     except Exception as e:

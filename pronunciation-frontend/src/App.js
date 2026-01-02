@@ -1,6 +1,9 @@
 import React, { useState, useRef } from 'react';
 import { Mic, Square, Volume2, CheckCircle, AlertCircle, Loader } from 'lucide-react';
 import './index.css';
+import ScoreGauge from './components/ScoreGauge';
+import AudioWaveform from './components/AudioWaveform';
+import MetricsChart from './components/MetricsChart';
 
 const PronunciationApp = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -11,10 +14,11 @@ const PronunciationApp = () => {
   const [language, setLanguage] = useState('en');
   const [mode, setMode] = useState('preset');
   const [customText, setCustomText] = useState('');
-  const [difficulty, setDifficulty] = useState('easy'); 
+  const [difficulty, setDifficulty] = useState('easy');
   const [generatedPhrase, setGeneratedPhrase] = useState('');
   const [generatingPhrase, setGeneratingPhrase] = useState(false);
-  
+  const [audioStream, setAudioStream] = useState(null);
+
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
 
@@ -58,6 +62,7 @@ const PronunciationApp = () => {
     try {
       setError(null);
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      setAudioStream(stream);
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
@@ -71,6 +76,7 @@ const PronunciationApp = () => {
       mediaRecorder.onstop = () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
         setAudioBlob(audioBlob);
+        setAudioStream(null);
         stream.getTracks().forEach(track => track.stop());
       };
 
@@ -321,6 +327,14 @@ const PronunciationApp = () => {
           </section>
         )}
 
+        {/* Audio Waveform Visualization */}
+        {((mode === 'custom' && customText) ||
+          (mode === 'difficulty' && generatedPhrase)) && (
+          <section className="mb-6">
+            <AudioWaveform isRecording={isRecording} audioStream={audioStream} />
+          </section>
+        )}
+
         {/* Recording Button */}
         <section className="flex items-center justify-center gap-4 mb-6">
           {!isRecording ? (
@@ -381,27 +395,35 @@ const PronunciationApp = () => {
         {/* Feedback Display */}
         {feedback && (
           <div className="border-t pt-6 mt-6">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">
+            <h3 className="text-xl font-bold text-gray-800 mb-6">
               Pronunciation Feedback
             </h3>
 
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-6 mb-4">
-              <div className="text-sm font-semibold text-gray-600 mb-1">
-                Overall Score
-              </div>
-              <div className="text-4xl font-bold text-emerald-600">
-                {feedback.score}/100
+            {/* Score Gauge and Metrics Chart Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              {/* Score Gauge */}
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-6 flex flex-col items-center justify-center">
+                <div className="text-sm font-semibold text-gray-600 mb-4">
+                  Overall Score
+                </div>
+                <ScoreGauge score={feedback.score} />
+                {feedback.score < 100 && (
+                  <button
+                    onClick={playTargetAudio}
+                    className="mt-6 flex items-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold px-4 py-2 rounded-lg transition-all"
+                  >
+                    <Volume2 size={20} />
+                    Listen to Target Audio
+                  </button>
+                )}
               </div>
 
-              {feedback.score < 100 && (
-                <button
-                  onClick={playTargetAudio}
-                  className="mt-4 flex items-center gap-2 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold px-4 py-2 rounded-lg transition-all"
-                >
-                  <Volume2 size={20} />
-                  Listen to Target Audio
-                </button>
-              )}
+              {/* Metrics Chart */}
+              <MetricsChart
+                audioFeatures={feedback.audio_features}
+                prosodyFeedback={feedback.prosody_feedback || []}
+                score={feedback.score}
+              />
             </div>
 
             {feedback.audio_features && (

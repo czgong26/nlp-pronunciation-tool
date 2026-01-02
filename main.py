@@ -244,18 +244,20 @@ async def generate_target_audio(
     try:
         # Select voice based on language
         voice = "alloy" if language == "en" else "nova"
-        
-        # Generate speech
-        response = client.audio.speech.create(
+
+        # Create temporary file for audio
+        temp_audio = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
+        temp_audio_path = temp_audio.name
+        temp_audio.close()
+
+        # Generate speech using streaming response
+        with client.audio.speech.with_streaming_response.create(
             model="tts-1",
             voice=voice,
             input=text
-        )
-        
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as temp_audio:
-            temp_audio.write(response.content)
-            temp_audio_path = temp_audio.name
-        
+        ) as response:
+            response.stream_to_file(temp_audio_path)
+
         # Return audio file
         return FileResponse(
             temp_audio_path,
